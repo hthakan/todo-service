@@ -1,14 +1,8 @@
 ﻿using Autofac;
-using ErrorHandler;
 using Microsoft.Extensions.Logging;
-using MongoDBManager;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using todo_service.OrderService;
 
-namespace todo_service.AutofacModules
+
+namespace todo.AutofacModules
 {
     public class ApplicationModule : Autofac.Module
     {
@@ -23,9 +17,9 @@ namespace todo_service.AutofacModules
         protected override void Load(ContainerBuilder builder)
         {
 
-            builder.RegisterType<OrderOperations>()
-             .As<IOrderOperations>()
-             .InstancePerLifetimeScope();
+            //builder.RegisterType<OrderOperations>()
+            // .As<IOrderOperations>()
+            // .InstancePerLifetimeScope();
 
         }
     }

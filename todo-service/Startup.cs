@@ -6,7 +6,6 @@ using Common.Services;
 using Common.Settings;
 using Common.StartupExtensions;
 using ErrorHandler;
-using EventBus;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -20,18 +19,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using MongoDBManager;
 using Serilog;
-using Serilog.Events;
 using Serilog.Filters;
-using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Linq;
-using todo_service.AutofacModules;
-using todo_service.Mappers;
-using todo_service.Requests;
-using todo_service.Validations;
 
 
 namespace todo_service
@@ -75,8 +66,7 @@ namespace todo_service
 
             services.AddControllers();
 
-            services.AddCustomConfiguration(Configuration, LoggerFactory)
-                    .AddMongoDB(Configuration)
+            services.AddCustomConfiguration(Configuration, LoggerFactory)                    
                     .AddCustomApiVersioning()
                     .AddAutoMapperConfiguration()
                     .AddFluentValidation()
@@ -84,35 +74,31 @@ namespace todo_service
                     .AddErrorHandler(Configuration)
                     .AddCors()
                     .AddValidators()
-                    .Configure<APISettings>(Configuration.GetSection("APISettings"))
-                    .Configure<EventBusSettings>(Configuration.GetSection("EventBusSettings"));
+                    .Configure<APISettings>(Configuration.GetSection("APISettings"));
 
             if (Configuration.GetSection("APISettings").GetValue<bool>("DCEnabled"))
-                services.AddRedisSentinelCache(Configuration);
+                services.AddDistributedCache(Configuration);
 
             if (Configuration.GetSection("APISettings").GetValue<bool>("JWTEnabled"))
                 services.AddJWTConfiguartion(Configuration);
-
-            if (Configuration.GetSection("APISettings").GetValue<bool>("EventBusEnabled"))
-                services.AddCapEventBus(Configuration);
+         
 
             var container = new ContainerBuilder();
             container.Populate(services);
-            container.RegisterModule(new ApplicationModule(Configuration["ConnectionString"], LoggerFactory));
+            //container.RegisterModule(new ApplicationModule(Configuration["ConnectionString"], LoggerFactory));
 
             return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, IMongoDbContext mongoDbContext, Microsoft.Extensions.Hosting.IHostApplicationLifetime lifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, IHostApplicationLifetime lifetime)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            loggerFactory.AddSerilog();
-            mongoDbContext.Init();
+            loggerFactory.AddSerilog();         
 
 
             if (Configuration.GetSection("APISettings").GetValue<bool>("ProfilingEnabled"))
@@ -157,10 +143,7 @@ namespace todo_service
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
-
-            if (Configuration.GetSection("APISettings").GetValue<bool>("EventBusEnabled"))
-                app.UseCapEventBus();
+            });           
         }
 
     }
@@ -181,7 +164,6 @@ namespace todo_service
                     var errorlist = context.ModelState.Values.SelectMany(x => x.Errors.Select(p => p.ErrorMessage)).ToList();
 
                     return ErrorHandler.ErrorHelperMethods.InvalidModelStateResponse(errorlist, loggerFactory);
-
                 };
             });
 
@@ -192,7 +174,7 @@ namespace todo_service
         {
             var mappingConfig = new MapperConfiguration(mc =>
             {
-                mc.AddProfile(new OrderMapper());
+                //mc.AddProfile(new OrderMapper());
             });
 
             IMapper mapper = mappingConfig.CreateMapper();
@@ -203,7 +185,7 @@ namespace todo_service
 
         public static IServiceCollection AddValidators(this IServiceCollection services)
         {
-            services.AddSingleton<IValidator<CreateOrderRequest>, CreateOrderRequestValidator>();
+            //services.AddSingleton<IValidator<CreateOrderRequest>, CreateOrderRequestValidator>();
             return services;
         }
 

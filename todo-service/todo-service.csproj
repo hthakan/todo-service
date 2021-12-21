@@ -32,10 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\Common\Common.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\ErrorHandler\ErrorHandler.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\EventBus\EventBus.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\MongoDBManager\MongoDBManager.csproj" />
+    <ProjectReference Include="..\CacheManager\CacheManager.csproj" />
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\ErrorHandler\ErrorHandler.csproj" />
   </ItemGroup>
 
   <ItemGroup>
